@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Remble Lansman Takvimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F6F2EB; --panel:#FFFDF9; --cell:#FBF8F3; --ink:#1E1A17; --ink-2:#4A423C; --mute:#80756B; --line:#E3DBCF; --line-2:#EDE6DB;
+    --accent:#7A4A2B; --accent-soft:#EFE3D7;
+    --c-prep:#8A8178; --c-site:#7A4A2B; --c-legal:#44566A; --c-pay:#5E6B2F; --c-creative:#B4552F; --c-social:#6C4863; --c-launch:#1E1A17;
+    --done:#3F6B3A;
+    --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --sans:"Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#171412; --panel:#201C19; --cell:#1C1916; --ink:#F1EAE0; --ink-2:#CFC4B7; --mute:#9C9085; --line:#342E29; --line-2:#2A2521;
+      --accent:#D39A6C; --accent-soft:#3A2B20;
+      --c-prep:#A99F95; --c-site:#D39A6C; --c-legal:#8FA7C0; --c-pay:#A9B86A; --c-creative:#E08A62; --c-social:#C48FB5; --c-launch:#F1EAE0;
+      --done:#8CC284;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#171412; --panel:#201C19; --cell:#1C1916; --ink:#F1EAE0; --ink-2:#CFC4B7; --mute:#9C9085; --line:#342E29; --line-2:#2A2521;
+    --accent:#D39A6C; --accent-soft:#3A2B20;
+    --c-prep:#A99F95; --c-site:#D39A6C; --c-legal:#8FA7C0; --c-pay:#A9B86A; --c-creative:#E08A62; --c-social:#C48FB5; --c-launch:#F1EAE0;
+    --done:#8CC284;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.5; padding-inline:20px; padding-block:36px 64px}
+  .wrap{max-width:1120px; margin:0 auto; display:flex; flex-direction:column; gap:32px}
+  h1,h2,h3{font-family:var(--serif); font-weight:500; margin:0; text-wrap:balance}
+  h1{font-size:clamp(32px,4.6vw,46px); line-height:1.05}
+  h2{font-size:26px; line-height:1.15}
+  p{margin:0}
+  .eyebrow{font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--mute)}
+  header{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:20px}
+  header .intro{display:flex; flex-direction:column; gap:10px; max-width:62ch}
+  header .lead{color:var(--ink-2)}
+  .progress{min-width:220px; display:flex; flex-direction:column; gap:8px}
+  .progress .num{font-family:var(--serif); font-size:30px; line-height:1; font-variant-numeric:tabular-nums}
+  .progress .num small{font-family:var(--sans); font-size:13px; color:var(--mute); margin-left:6px}
+  .bar{height:6px; background:var(--line-2); border-radius:3px; overflow:hidden}
+  .bar i{display:block; height:100%; background:var(--done); width:0; transition:width .3s}
+  .sync{font-size:12.5px; color:var(--mute)}
+
+  /* aşamalar */
+  .phases{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; counter-reset:ph}
+  .phase{counter-increment:ph}
+  .phase button{all:unset; box-sizing:border-box; cursor:pointer; width:100%; display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--line); border-radius:6px; background:var(--panel); border-top:3px solid var(--pc)}
+  .phase button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .phase .pn{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); font-variant-numeric:tabular-nums}
+  .phase .pn::before{content:counter(ph) " · "}
+  .phase .pt{font-weight:500; font-size:14px}
+  .phase .pd{font-size:12.5px; color:var(--mute); font-variant-numeric:tabular-nums}
+  .phase.complete button{background:color-mix(in srgb,var(--done) 9%,var(--panel))}
+  .phase.complete .pt::after{content:" ✓"; color:var(--done)}
+
+  /* takvim + panel */
+  .main{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:24px; align-items:start}
+  .cal{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px}
+  .cal-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px}
+  .cal-head .rng{font-size:13px; color:var(--mute)}
+  .dow,.grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+  .dow span{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; padding-bottom:4px}
+  .cell{all:unset; box-sizing:border-box; min-height:82px; border-radius:6px; background:var(--cell); border:1px solid var(--line-2); padding:7px 8px; display:flex; flex-direction:column; gap:4px; position:relative}
+  .cell.out{opacity:.35}
+  .cell.has{cursor:pointer; background:var(--panel); border-color:var(--line)}
+  .cell.has::before{content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:6px 6px 0 0; background:var(--pc)}
+  .cell.has:hover{border-color:var(--mute)}
+  .cell:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  .cell.sel{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); background:var(--accent-soft)}
+  .cell .d{font-variant-numeric:tabular-nums; font-size:14px; font-weight:500; display:flex; justify-content:space-between; align-items:baseline; gap:4px}
+  .cell .d .m{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); font-weight:400}
+  .cell .today{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:600}
+  .cell .ph{font-size:11.5px; line-height:1.25; color:var(--ink-2)}
+  .cell .cnt{margin-top:auto; font-size:11px; color:var(--mute); font-variant-numeric:tabular-nums}
+  .cell.alldone .cnt{color:var(--done); font-weight:600}
+  .cell.launch .ph{font-weight:600; color:var(--ink)}
+  .cell.wait .ph{font-style:italic; color:var(--mute)}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px 22px; display:flex; flex-direction:column; gap:16px; position:sticky; top:calc(env(safe-area-inset-top,0px) + 16px)}
+  .panel .pdate{display:flex; flex-direction:column; gap:6px}
+  .chip{align-self:flex-start; font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border-radius:999px; color:var(--bg); background:var(--pc)}
+  .panel .note{font-size:13.5px; color:var(--ink-2); background:var(--cell); border:1px solid var(--line-2); border-radius:6px; padding:10px 12px}
+  ul.tasks{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+  .task{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start; padding:10px 8px; border-radius:6px}
+  .task:hover{background:var(--cell)}
+  .task input{width:18px; height:18px; margin:2px 0 0; accent-color:var(--done); cursor:pointer}
+  .task label{cursor:pointer}
+  .task .tt{display:block}
+  .task .ts{display:block; font-size:13px; color:var(--mute); margin-top:2px}
+  .task.done .tt{color:var(--mute); text-decoration:line-through; text-decoration-color:color-mix(in srgb,var(--mute) 60%,transparent)}
+  .own{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:999px; white-space:nowrap; margin-top:2px}
+  .own.siz{background:var(--ink); color:var(--bg)}
+  .own.claude{border:1px solid var(--line); color:var(--ink-2)}
+  .own.birlikte{border:1px dashed var(--mute); color:var(--ink-2)}
+  .nav{display:flex; justify-content:space-between; gap:8px}
+  .nav button{font:inherit; font-size:13px; padding:7px 12px; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; cursor:pointer}
+  .nav button:disabled{opacity:.35; cursor:default}
+  .nav button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .after{display:grid; grid-template-columns:1fr 1fr; gap:28px; border-top:1px solid var(--line); padding-top:28px}
+  .after .b{display:flex; flex-direction:column; gap:10px}
+  .after ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; color:var(--ink-2)}
+  .after b{color:var(--ink); font-weight:500}
+  footer{color:var(--mute); font-size:13px}
+
+  .c-prep{--pc:var(--c-prep)} .c-site{--pc:var(--c-site)} .c-legal{--pc:var(--c-legal)} .c-pay{--pc:var(--c-pay)} .c-creative{--pc:var(--c-creative)} .c-social{--pc:var(--c-social)} .c-launch{--pc:var(--c-launch)}
+
+  @media (max-width:900px){ .main{grid-template-columns:1fr} .panel{position:static} .after{grid-template-columns:1fr} }
+  @media (max-width:520px){
+    .cal{padding:10px} .dow,.grid{gap:4px}
+    .cell{min-height:54px; padding:5px}
+    .cell .ph{display:none}
+    .cell .d .m{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <p class="eyebrow">rembletools.com · Sıralı lansman planı</p>
+      <h1>Remble Lansman Takvimi</h1>
+      <p class="lead">Her aşama bir öncekinin bitmesiyle başlıyor. Bir güne tıklayın, o günün işleri sağda açılır; yaptıklarınızı işaretleyin. İşaretler ekipteki herkeste görünür.</p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <p class="eyebrow">Toplam ilerleme</p>
+      <p class="num" id="pnum">0<small>/ 0 görev</small></p>
+      <div class="bar"><i id="pbar"></i></div>
+      <p class="sync" id="sync">Bağlanıyor…</p>
+    </div>
+  </header>
+
+  <ol class="phases" id="phases" aria-label="Aşamalar"></ol>
+
+  <div class="main">
+    <section class="cal" aria-label="Takvim">
+      <div class="cal-head"><h2>Eylül – Ekim 2026</h2><span class="rng">Lansman: 14 Ekim Çarşamba</span></div>
+      <div class="dow"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+      <div class="grid" id="grid"></div>
+    </section>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section class="after">
+    <div class="b">
+      <p class="eyebrow">15 Ekim ve sonrası</p>
+      <h2>Lansman sonrası rutin</h2>
+      <ul>
+        <li><b>Her pazartesi:</b> reklamcıdan gelen sonuçların değerlendirilmesi.</li>
+        <li><b>7–10 günde bir:</b> reklamcıya yeni kreatif, kazanan konseptin varyasyonları.</li>
+        <li><b>Siparişler:</b> kargoya verme süresi ve iade talepleri, ilk ayda yakından takip.</li>
+        <li><b>1. ay sonu:</b> bütçe kararı ve kliniklere toplu satış görüşmeleri.</li>
+      </ul>
+    </div>
+    <div class="b">
+      <p class="eyebrow">Tarihi netleşince, 3–4 hafta önceden</p>
+      <h2>İkinci ürün hazırlığı</h2>
+      <ul>
+        <li><b>İsimlendirme:</b> mevcut ürün Remble One ya da Remble Origin olur.</li>
+        <li><b>Marka:</b> alt isimler TÜRKPATENT'e eklenir.</li>
+        <li><b>Site:</b> ürün ailesi yapısı; gerekirse sepetli e-ticaret altyapısı.</li>
+        <li><b>Görsel ve video:</b> gerçek ürün fotoğraflarıyla referanslı yeni kareler.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>Dış taraflarla yapılan işler (avukat, reklamcı, kargo, iyzico) hafta içine, kendi yapabildiğimiz işler hafta sonuna da planlandı. iyzico incelemesi 6 Ekim'deki başvurudan sonra arka planda sürer; bu sırada diğer aşamalar ilerler. Onay 13 Ekim'e yetişmezse lansman günü reklamlar tanıtım ve iletişim hedefiyle başlar, onay gelince satışa geçilir.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var PHASES=[
+    {id:"p1",name:"Hazırlık",cls:"c-prep"},
+    {id:"p4",name:"Yasal sayfalar",cls:"c-legal"},
+    {id:"p5",name:"Satış bölümü",cls:"c-site"},
+    {id:"p2",name:"Site yayını",cls:"c-site"},
+    {id:"p3",name:"ETBİS kaydı",cls:"c-legal"},
+    {id:"p6",name:"iyzico başvurusu",cls:"c-pay"},
+    {id:"p7",name:"Reklam kreatifi",cls:"c-creative"},
+    {id:"p8",name:"Reklamcıya teslim",cls:"c-social"},
+    {id:"p10",name:"Ödeme bağlantısı",cls:"c-pay"},
+    {id:"p11",name:"Lansman",cls:"c-launch"}
+  ];
+  var DAYS={
+    "2026-09-29":{p:"p1",note:"Takvimin geri kalanı bu bilgilere bağlı.",t:[
+      ["Satış bilgilerini gönderin","Unvan, açık adres, vergi dairesi ve no (veya MERSİS no), telefon, KDV dahil fiyat.","siz"],
+      ["Kargo bilgilerini netleştirin","Firma, teslim süresi, kargo ücreti kimde; 80 cm kutu için desi fiyatı.","siz"],
+      ["Reklamcıyla görüşün","KVKK şablonunu isteyin.","siz"]
+    ]},
+    "2026-09-30":{p:"p4",t:[
+      ["Satıcı Bilgileri sayfası","","claude"],
+      ["İptal, İade ve Cayma sayfası","Standart şablonla; teslimat ve kargo bilgisi dahil.","claude"],
+      ["KVKK ve Gizlilik güncellemesi","Reklamcıdan gelen KVKK şablonuna göre; sipariş verileri, kargo, iyzico.","claude"],
+      ["Taslakları avukata gönderin","","siz"]
+    ]},
+    "2026-10-01":{p:"p4",wait:true,t:[
+      ["Avukat kontrolü","Notlar gelince bize iletin.","siz"]
+    ]},
+    "2026-10-02":{p:"p4",t:[
+      ["Avukat notları işlenir","","claude"],
+      ["Yasal sayfalar siteye eklenir","Alt menüye tüm bağlantılar eklenir.","claude"],
+      ["Son hâli kontrol edin","","siz"]
+    ]},
+    "2026-10-03":{p:"p5",note:"Bu günün sonunda site eksiksiz, yayına hazır.",t:[
+      ["Satış bölümü hazırlanır","KDV dahil fiyat, kutu içeriği, kargo süresi ve ücreti.","claude"],
+      ["\"Satın al\" butonu \"Yakında\" olarak eklenir","iyzico onayına kadar pasif.","claude"],
+      ["Satış bölümünü onaylayın","","siz"],
+      ["Satış bölümü siteye eklenir","","claude"]
+    ]},
+    "2026-10-04":{p:"p2",note:"Site yasal sayfalar ve satış bölümüyle birlikte, tamamlanmış hâliyle yayına girer.",t:[
+      ["Yasal sayfalarda tarih güncellenir","","claude"],
+      ["Siteyi yayınlayın","rembletools.com adresinde.","birlikte"]
+    ]},
+    "2026-10-05":{p:"p3",t:[
+      ["e-Devlet'ten ETBİS kaydı","Site adresi ve şirket bilgileriyle.","siz"],
+      ["ETBİS karekodu sitenin alt kısmına eklenir","","claude"]
+    ]},
+    "2026-10-06":{p:"p6",note:"İnceleme bundan sonra arka planda sürer.",t:[
+      ["iyzico başvurusu","Vergi levhası, imza sirküleri, kimlik, IBAN, canlı site ve ETBİS kaydıyla. Mesafeli satış sözleşmesini iyzico sağlıyor.","siz"],
+      ["Başvuru belgelerini kontrol edin","Eksik belge sorulursa aynı gün yanıtlayın.","siz"]
+    ]},
+    "2026-10-07":{p:"p7",note:"Reklam kreatiflerinin belirlendiği gün.",t:[
+      ["Reklam brief'i ve konsept önerileri","Hedef kitle, ana mesaj, ton, 3 konsept.","claude"],
+      ["Konsepti seçin","","siz"],
+      ["Storyboard","","claude"],
+      ["Storyboard'u onaylayın","","siz"]
+    ]},
+    "2026-10-08":{p:"p7",note:"Üretimin 1. günü.",t:[
+      ["Ana reklam filmi","Her üretim adımı sizin onayınızla.","claude"],
+      ["Ana filmi onaylayın","","siz"]
+    ]},
+    "2026-10-09":{p:"p7",note:"Üretimin 2. günü.",t:[
+      ["Video varyantları","Farklı platformlar için kesimler.","claude"],
+      ["Müzik, ses ve altyazı","","claude"]
+    ]},
+    "2026-10-10":{p:"p7",note:"Üretimin 3. günü.",t:[
+      ["Reklam görselleri","","claude"],
+      ["Tüm kreatiflerin son onayı","","siz"]
+    ]},
+    "2026-10-12":{p:"p8",note:"Reklam hesabı, kampanya ve sosyal medya yönetimi reklamcıda.",t:[
+      ["Kreatifleri reklamcıya gönderin","","siz"],
+      ["Reklamcının istediği takip kodu varsa siteye eklenir","Gerekirse çerez onay bandı ve çerez politikası güncellemesiyle.","claude"]
+    ]},
+    "2026-10-13":{p:"p10",note:"iyzico onayı gelmiş olmalı; gelmediyse B planı (alt not).",t:[
+      ["iyzico panelinde ödeme linki oluşturun","","siz"],
+      ["Link \"Satın al\" butonuna bağlanır","","claude"],
+      ["Onay kutuları ve teşekkürler sayfası","","claude"],
+      ["Test ödemesi ve iadesi","","birlikte"]
+    ]},
+    "2026-10-14":{p:"p11",launch:true,t:[
+      ["\"Satın al\" butonu açılır","Satış başlar.","claude"],
+      ["Reklamcıya yayın onayı verin","Reklamlar ve lansman paylaşımları reklamcı tarafından yayına alınır.","siz"]
+    ]}
+  };
+  var START=new Date(2026,8,28), WEEKS=5, MONTHS=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+  var MONTHS_L=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  var WD=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+  var OWN={siz:"Siz",claude:"Claude",birlikte:"Birlikte"};
+  function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+  function parse(k){var a=k.split("-");return new Date(+a[0],+a[1]-1,+a[2])}
+  function phase(id){for(var i=0;i<PHASES.length;i++)if(PHASES[i].id===id)return PHASES[i]}
+  function tid(k,i){return "t"+k.replace(/-/g,"")+"-"+(i+1)}
+  var dayKeys=Object.keys(DAYS).sort();
+  var allIds=[]; dayKeys.forEach(function(k){DAYS[k].t.forEach(function(_,i){allIds.push(tid(k,i))})});
+
+  var checks={}, db=null, readOnly=false, mode="local";
+  var todayKey=key(new Date());
+  var sel=DAYS[todayKey]?todayKey:(dayKeys.filter(function(k){return k>=todayKey})[0]||dayKeys[0]);
+
+  function lsGet(){try{return JSON.parse(localStorage.getItem("remble-takvim")||"{}")||{}}catch(e){return {}}}
+  function lsSet(){try{localStorage.setItem("remble-takvim",JSON.stringify(checks))}catch(e){}}
+
+  function dayStats(k){var d=DAYS[k],n=d.t.length,c=0;d.t.forEach(function(_,i){if(checks[tid(k,i)])c++});return {n:n,c:c}}
+
+  function renderPhases(){
+    var ol=document.getElementById("phases"); ol.innerHTML="";
+    PHASES.forEach(function(p){
+      var ks=dayKeys.filter(function(k){return DAYS[k].p===p.id});
+      var n=0,c=0; ks.forEach(function(k){var s=dayStats(k);n+=s.n;c+=s.c});
+      var a=parse(ks[0]), b=parse(ks[ks.length-1]);
+      var dr=a.getDate()+" "+MONTHS[a.getMonth()]+(ks.length>1?" – "+b.getDate()+" "+MONTHS[b.getMonth()]:"");
+      var li=document.createElement("li"); li.className="phase "+p.cls+(n&&c===n?" complete":"");
+      var bt=document.createElement("button"); bt.type="button";
+      bt.innerHTML='<span class="pn">'+c+"/"+n+'</span><span class="pt"></span><span class="pd"></span>';
+      bt.querySelector(".pt").textContent=p.name; bt.querySelector(".pd").textContent=dr;
+      bt.addEventListener("click",function(){sel=ks[0];render();document.getElementById("panel").scrollIntoView({block:"nearest",behavior:"smooth"})});
+      li.appendChild(bt); ol.appendChild(li);
+    });
+  }
+
+  function renderGrid(){
+    var g=document.getElementById("grid"); g.innerHTML="";
+    for(var i=0;i<WEEKS*7;i++){
+      var d=new Date(START.getFullYear(),START.getMonth(),START.getDate()+i), k=key(d), info=DAYS[k];
+      var el=document.createElement(info?"button":"div"); el.className="cell";
+      if(info){
+        var p=phase(info.p), s=dayStats(k);
+        el.type="button"; el.className+=" has "+p.cls+(k===sel?" sel":"")+(s.c===s.n?" alldone":"")+(info.launch?" launch":"")+(info.wait?" wait":"");
+        el.setAttribute("aria-label",d.getDate()+" "+MONTHS_L[d.getMonth()]+", "+p.name+", "+s.c+" / "+s.n+" tamam");
+        if(k===sel)el.setAttribute("aria-pressed","true");
+        (function(kk){el.addEventListener("click",function(){sel=kk;render()})})(k);
+      }
+      var top='<span class="d"><span>'+d.getDate()+'</span>'+(d.getDate()===1||i===0?'<span class="m">'+MONTHS[d.getMonth()]+'</span>':"")+'</span>';
+      if(k===todayKey)top+='<span class="today">Bugün</span>';
+      el.innerHTML=top;
+      if(info){
+        var ph=document.createElement("span"); ph.className="ph"; ph.textContent=info.launch?"Lansman":phase(info.p).name+(info.wait?" · bekleme":"");
+        var cn=document.createElement("span"); cn.className="cnt"; var st=dayStats(k); cn.textContent=st.c===st.n?"Tamam ✓":st.c+" / "+st.n;
+        el.appendChild(ph); el.appendChild(cn);
+      }
+      g.appendChild(el);
+    }
+  }
+
+  function renderPanel(){
+    var pn=document.getElementById("panel"), info=DAYS[sel], d=parse(sel), p=phase(info.p);
+    pn.className="panel "+p.cls; pn.innerHTML="";
+    var hd=document.createElement("div"); hd.className="pdate";
+    var chip=document.createElement("span"); chip.className="chip"; chip.textContent=(PHASES.indexOf(p)+1)+". aşama · "+p.name;
+    var h=document.createElement("h2"); h.textContent=d.getDate()+" "+MONTHS_L[d.getMonth()]+" "+WD[d.getDay()];
+    hd.appendChild(chip); hd.appendChild(h); pn.appendChild(hd);
+    if(info.note){var nt=document.createElement("p");nt.className="note";nt.textContent=info.note;pn.appendChild(nt)}
+    var ul=document.createElement("ul"); ul.className="tasks";
+    info.t.forEach(function(t,i){
+      var id=tid(sel,i), li=document.createElement("li"); li.className="task"+(checks[id]?" done":"");
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!checks[id]; cb.disabled=readOnly;
+      cb.addEventListener("change",function(){toggle(id,cb.checked)});
+      var lb=document.createElement("label"); lb.htmlFor=id;
+      var tt=document.createElement("span"); tt.className="tt"; tt.textContent=t[0]; lb.appendChild(tt);
+      if(t[1]){var ts=document.createElement("span");ts.className="ts";ts.textContent=t[1];lb.appendChild(ts)}
+      var ow=document.createElement("span"); ow.className="own "+t[2]; ow.textContent=OWN[t[2]];
+      li.appendChild(cb); li.appendChild(lb); li.appendChild(ow); ul.appendChild(li);
+    });
+    pn.appendChild(ul);
+    var idx=dayKeys.indexOf(sel), nav=document.createElement("div"); nav.className="nav";
+    var pv=document.createElement("button"); pv.type="button"; pv.textContent="← Önceki gün"; pv.disabled=idx<=0;
+    var nx=document.createElement("button"); nx.type="button"; nx.textContent="Sonraki gün →"; nx.disabled=idx>=dayKeys.length-1;
+    pv.addEventListener("click",function(){sel=dayKeys[idx-1];render()}); nx.addEventListener("click",function(){sel=dayKeys[idx+1];render()});
+    nav.appendChild(pv); nav.appendChild(nx); pn.appendChild(nav);
+  }
+
+  function renderProgress(){
+    var c=allIds.filter(function(id){return checks[id]}).length, n=allIds.length;
+    document.getElementById("pnum").innerHTML=c+"<small>/ "+n+" görev</small>";
+    document.getElementById("pbar").style.width=(n?Math.round(100*c/n):0)+"%";
+    document.getElementById("sync").textContent=readOnly?"Salt okunur: işaretleme yetkiniz yok.":mode==="shared"?"İşaretler ekiple paylaşılıyor.":"İşaretler yalnızca bu cihazda saklanıyor.";
+  }
+  function render(){renderPhases();renderGrid();renderPanel();renderProgress()}
+
+  function toggle(id,val){
+    if(val)checks[id]=true; else delete checks[id];
+    render();
+    if(db&&!readOnly){
+      db.doc("checks/"+id).set({done:!!val,at:new Date().toISOString()}).catch(function(e){
+        if(e&&e.code==="invalid_argument"){readOnly=true;render()}
+      });
+    }else if(!db){lsSet()}
+  }
+
+  checks=lsGet(); render();
+  if(window.claude&&typeof window.claude.use==="function"){
+    window.claude.use("db").then(function(ns){
+      if(!ns){renderProgress();return}
+      db=ns; mode="shared"; checks={};
+      db.collection("checks").onSnapshot(function(snap){
+        var next={}; snap.docs.forEach(function(d){var v=d.data(); if(v&&v.done)next[d.id]=true});
+        checks=next; render();
+      },function(){db=null;mode="local";checks=lsGet();render()});
+    },function(){renderProgress()});
+  }
+})();
+</script>
+</body>
+</html>
