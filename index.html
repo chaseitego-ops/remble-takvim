@@ -102,6 +102,11 @@
   .own.siz{background:var(--ink); color:var(--bg)}
   .own.claude{border:1px solid var(--line); color:var(--ink-2)}
   .own.birlikte{border:1px dashed var(--mute); color:var(--ink-2)}
+  .ghbtn{align-self:flex-start; font-size:13px; color:var(--accent); text-decoration:none; border:1px solid var(--line); border-radius:6px; padding:6px 11px}
+  .ghbtn:hover{border-color:var(--accent)}
+  .ghbtn:focus-visible,.tl:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  a.tl{color:inherit; text-decoration:none; display:block}
+  a.tl:hover .tt{text-decoration:underline; text-decoration-color:var(--line)}
   .nav{display:flex; justify-content:space-between; gap:8px}
   .nav button{font:inherit; font-size:13px; padding:7px 12px; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; cursor:pointer}
   .nav button:disabled{opacity:.35; cursor:default}
@@ -131,7 +136,7 @@
     <div class="intro">
       <p class="eyebrow">rembletools.com · Sıralı lansman planı</p>
       <h1>Remble Lansman Takvimi</h1>
-      <p class="lead">Her aşama bir öncekinin bitmesiyle başlıyor. Bir güne tıklayın, o günün işleri sağda açılır; yaptıklarınızı işaretleyin. İşaretler ekipteki herkeste görünür.</p>
+      <p class="lead">Her aşama bir öncekinin bitmesiyle başlıyor. Bir güne tıklayın, o günün işleri sağda açılır. Görevler GitHub'da işaretleniyor; bir göreve ya da "GitHub'da işaretle" butonuna tıklayınca o günün issue'su açılır. İşaretler ekipteki herkeste görünür.</p>
     </div>
     <div class="progress" aria-live="polite">
       <p class="eyebrow">Toplam ilerleme</p>
@@ -175,7 +180,7 @@
     </div>
   </section>
 
-  <footer>Dış taraflarla yapılan işler (avukat, reklamcı, kargo, iyzico) hafta içine, kendi yapabildiğimiz işler hafta sonuna da planlandı. iyzico incelemesi 6 Ekim'deki başvurudan sonra arka planda sürer; bu sırada diğer aşamalar ilerler. Onay 13 Ekim'e yetişmezse lansman günü reklamlar tanıtım ve iletişim hedefiyle başlar, onay gelince satışa geçilir.</footer>
+  <footer>İşaretler GitHub issue'larından okunur; GitHub'da yapılan bir işaret 1–2 dakika içinde burada görünür. İşaretlemek için GitHub hesabı ve depoya ekip üyesi olarak eklenmiş olmak gerekir. Dış taraflarla yapılan işler (avukat, reklamcı, kargo, iyzico) hafta içine, kendi yapabildiğimiz işler hafta sonuna da planlandı. iyzico incelemesi 6 Ekim'deki başvurudan sonra arka planda sürer; bu sırada diğer aşamalar ilerler. Onay 13 Ekim'e yetişmezse lansman günü reklamlar tanıtım ve iletişim hedefiyle başlar, onay gelince satışa geçilir.</footer>
 </div>
 
 <script>
@@ -275,12 +280,14 @@
   var dayKeys=Object.keys(DAYS).sort();
   var allIds=[]; dayKeys.forEach(function(k){DAYS[k].t.forEach(function(_,i){allIds.push(tid(k,i))})});
 
-  var checks={}, db=null, readOnly=false, mode="local";
+  var checks={}, lastSync=null, syncErr=false;
+  var REPO="chaseitego-ops/remble-takvim", ISSUES={"2026-09-29": 1, "2026-09-30": 2, "2026-10-01": 3, "2026-10-02": 4, "2026-10-03": 5, "2026-10-04": 6, "2026-10-05": 7, "2026-10-06": 8, "2026-10-07": 9, "2026-10-08": 10, "2026-10-09": 11, "2026-10-10": 12, "2026-10-12": 13, "2026-10-13": 14, "2026-10-14": 15};
+  function issueUrl(k){return "https://github.com/"+REPO+"/issues/"+ISSUES[k]}
   var todayKey=key(new Date());
   var sel=DAYS[todayKey]?todayKey:(dayKeys.filter(function(k){return k>=todayKey})[0]||dayKeys[0]);
 
-  function lsGet(){try{return JSON.parse(localStorage.getItem("remble-takvim")||"{}")||{}}catch(e){return {}}}
-  function lsSet(){try{localStorage.setItem("remble-takvim",JSON.stringify(checks))}catch(e){}}
+  function cacheGet(){try{return JSON.parse(localStorage.getItem("remble-gh")||"null")}catch(e){return null}}
+  function cacheSet(o){try{localStorage.setItem("remble-gh",JSON.stringify(o))}catch(e){}}
 
   function dayStats(k){var d=DAYS[k],n=d.t.length,c=0;d.t.forEach(function(_,i){if(checks[tid(k,i)])c++});return {n:n,c:c}}
 
@@ -330,14 +337,16 @@
     var hd=document.createElement("div"); hd.className="pdate";
     var chip=document.createElement("span"); chip.className="chip"; chip.textContent=(PHASES.indexOf(p)+1)+". aşama · "+p.name;
     var h=document.createElement("h2"); h.textContent=d.getDate()+" "+MONTHS_L[d.getMonth()]+" "+WD[d.getDay()];
-    hd.appendChild(chip); hd.appendChild(h); pn.appendChild(hd);
+    var gh=document.createElement("a"); gh.className="ghbtn"; gh.href=issueUrl(sel); gh.target="_blank"; gh.rel="noopener"; gh.textContent="GitHub'da işaretle ↗";
+    hd.appendChild(chip); hd.appendChild(h); hd.appendChild(gh); pn.appendChild(hd);
     if(info.note){var nt=document.createElement("p");nt.className="note";nt.textContent=info.note;pn.appendChild(nt)}
     var ul=document.createElement("ul"); ul.className="tasks";
     info.t.forEach(function(t,i){
       var id=tid(sel,i), li=document.createElement("li"); li.className="task"+(checks[id]?" done":"");
-      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!checks[id]; cb.disabled=readOnly;
-      cb.addEventListener("change",function(){toggle(id,cb.checked)});
-      var lb=document.createElement("label"); lb.htmlFor=id;
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!checks[id]; cb.tabIndex=-1;
+      cb.setAttribute("aria-label",(checks[id]?"Tamamlandı: ":"Açık: ")+t[0]);
+      cb.addEventListener("click",function(e){e.preventDefault();window.open(issueUrl(sel),"_blank","noopener")});
+      var lb=document.createElement("a"); lb.href=issueUrl(sel); lb.target="_blank"; lb.rel="noopener"; lb.className="tl";
       var tt=document.createElement("span"); tt.className="tt"; tt.textContent=t[0]; lb.appendChild(tt);
       if(t[1]){var ts=document.createElement("span");ts.className="ts";ts.textContent=t[1];lb.appendChild(ts)}
       var ow=document.createElement("span"); ow.className="own "+t[2]; ow.textContent=OWN[t[2]];
@@ -355,31 +364,24 @@
     var c=allIds.filter(function(id){return checks[id]}).length, n=allIds.length;
     document.getElementById("pnum").innerHTML=c+"<small>/ "+n+" görev</small>";
     document.getElementById("pbar").style.width=(n?Math.round(100*c/n):0)+"%";
-    document.getElementById("sync").textContent=readOnly?"Salt okunur: işaretleme yetkiniz yok.":mode==="shared"?"İşaretler ekiple paylaşılıyor.":"İşaretler yalnızca bu cihazda saklanıyor.";
+    var t=lastSync?lastSync.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):"";
+    document.getElementById("sync").textContent=syncErr?(lastSync?"GitHub'a şu an ulaşılamıyor; "+t+" itibarıyla durum gösteriliyor.":"GitHub'a ulaşılamadı; biraz sonra yeniden denenecek."):(lastSync?"Son değişiklik · "+t:"GitHub'dan alınıyor…");
   }
   function render(){renderPhases();renderGrid();renderPanel();renderProgress()}
 
-  function toggle(id,val){
-    if(val)checks[id]=true; else delete checks[id];
-    render();
-    if(db&&!readOnly){
-      db.doc("checks/"+id).set({done:!!val,at:new Date().toISOString()}).catch(function(e){
-        if(e&&e.code==="invalid_argument"){readOnly=true;render()}
-      });
-    }else if(!db){lsSet()}
+  function pull(){
+    fetch("durum.json?t="+Date.now(),{cache:"no-store"}).then(function(r){
+      if(!r.ok)throw new Error(r.status); return r.json();
+    }).then(function(o){
+      var next={}; Object.keys(o.days||{}).forEach(function(k){ if(!DAYS[k])return; o.days[k].forEach(function(v,i){ if(v)next[tid(k,i)]=true; }); });
+      checks=next; lastSync=o.at?new Date(o.at):new Date(); syncErr=false;
+      cacheSet({checks:checks,at:lastSync.toISOString()}); render();
+    }).catch(function(){syncErr=true;renderProgress()});
   }
-
-  checks=lsGet(); render();
-  if(window.claude&&typeof window.claude.use==="function"){
-    window.claude.use("db").then(function(ns){
-      if(!ns){renderProgress();return}
-      db=ns; mode="shared"; checks={};
-      db.collection("checks").onSnapshot(function(snap){
-        var next={}; snap.docs.forEach(function(d){var v=d.data(); if(v&&v.done)next[d.id]=true});
-        checks=next; render();
-      },function(){db=null;mode="local";checks=lsGet();render()});
-    },function(){renderProgress()});
-  }
+  var c0=cacheGet(); if(c0&&c0.checks){checks=c0.checks; lastSync=new Date(c0.at); syncErr=true}
+  render(); pull();
+  setInterval(function(){if(!document.hidden)pull()},60000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)pull()});
 })();
 </script>
 </body>

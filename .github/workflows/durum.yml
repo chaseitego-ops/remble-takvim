@@ -1,0 +1,31 @@
+name: Takvim durumu
+on:
+  issues:
+    types: [opened, edited, closed, reopened, deleted]
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: read
+concurrency:
+  group: durum
+  cancel-in-progress: false
+jobs:
+  durum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: İşaretleri oku
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: python3 scripts/durum.py
+      - name: Kaydet
+        run: |
+          if [ -n "$(git status --porcelain durum.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add durum.json
+            git commit -m "Takvim durumu güncellendi"
+            git pull --rebase
+            git push
+          fi
