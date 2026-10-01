@@ -105,8 +105,25 @@
   .ghbtn{align-self:flex-start; font-size:13px; color:var(--accent); text-decoration:none; border:1px solid var(--line); border-radius:6px; padding:6px 11px}
   .ghbtn:hover{border-color:var(--accent)}
   .ghbtn:focus-visible,.tl:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  a.tl{color:inherit; text-decoration:none; display:block}
-  a.tl:hover .tt{text-decoration:underline; text-decoration-color:var(--line)}
+  label.tl{display:block; cursor:pointer}
+  .task.busy{opacity:.55}
+  .team{font-size:12.5px; color:var(--mute); display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center}
+  .team.on{color:var(--done)}
+  .linkbtn{all:unset; cursor:pointer; color:var(--accent); text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px}
+  .linkbtn:hover{text-decoration-color:var(--accent)}
+  .linkbtn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  dialog{border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); padding:22px 24px; width:min(92vw,440px)}
+  dialog::backdrop{background:rgba(20,16,13,.45)}
+  dialog form{display:flex; flex-direction:column; gap:12px}
+  dialog p{font-size:13.5px; color:var(--ink-2)}
+  dialog label{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute)}
+  dialog input{font:inherit; padding:9px 11px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); width:100%}
+  dialog input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  dialog .err{color:var(--c-creative); min-height:1.2em}
+  dialog .row{display:flex; justify-content:flex-end; gap:8px}
+  dialog button{font:inherit; cursor:pointer; padding:8px 14px; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
+  dialog button.pri{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+  dialog button:disabled{opacity:.5; cursor:default}
   .nav{display:flex; justify-content:space-between; gap:8px}
   .nav button{font:inherit; font-size:13px; padding:7px 12px; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; cursor:pointer}
   .nav button:disabled{opacity:.35; cursor:default}
@@ -136,13 +153,14 @@
     <div class="intro">
       <p class="eyebrow">rembletools.com · Sıralı lansman planı</p>
       <h1>Remble Lansman Takvimi</h1>
-      <p class="lead">Her aşama bir öncekinin bitmesiyle başlıyor. Bir güne tıklayın, o günün işleri sağda açılır. Görevler GitHub'da işaretleniyor; bir göreve ya da "GitHub'da işaretle" butonuna tıklayınca o günün issue'su açılır. İşaretler ekipteki herkeste görünür.</p>
+      <p class="lead">Her aşama bir öncekinin bitmesiyle başlıyor. Bir güne tıklayın, o günün işleri sağda açılır. Ekip girişi yaptıysanız görevleri doğrudan buradan işaretleyebilirsiniz; işaret birkaç saniye içinde ekipteki herkeste görünür.</p>
     </div>
     <div class="progress" aria-live="polite">
       <p class="eyebrow">Toplam ilerleme</p>
       <p class="num" id="pnum">0<small>/ 0 görev</small></p>
       <div class="bar"><i id="pbar"></i></div>
       <p class="sync" id="sync">Bağlanıyor…</p>
+      <p class="team" id="team"></p>
     </div>
   </header>
 
@@ -180,8 +198,22 @@
     </div>
   </section>
 
-  <footer>İşaretler GitHub issue'larından okunur; GitHub'da yapılan bir işaret 1–2 dakika içinde burada görünür. İşaretlemek için GitHub hesabı ve depoya ekip üyesi olarak eklenmiş olmak gerekir. Dış taraflarla yapılan işler (avukat, reklamcı, kargo, iyzico) hafta içine, kendi yapabildiğimiz işler hafta sonuna da planlandı. iyzico incelemesi 6 Ekim'deki başvurudan sonra arka planda sürer; bu sırada diğer aşamalar ilerler. Onay 13 Ekim'e yetişmezse lansman günü reklamlar tanıtım ve iletişim hedefiyle başlar, onay gelince satışa geçilir.</footer>
+  <footer>İşaretler GitHub'da saklanır. Ekip linkiyle giren herkes bu sayfadan işaretleyebilir; ekip girişi olmayanlar yalnızca görüntüler ve değişiklikleri 1–2 dakika içinde görür. Dış taraflarla yapılan işler (avukat, reklamcı, kargo, iyzico) hafta içine, kendi yapabildiğimiz işler hafta sonuna da planlandı. iyzico incelemesi 6 Ekim'deki başvurudan sonra arka planda sürer; bu sırada diğer aşamalar ilerler. Onay 13 Ekim'e yetişmezse lansman günü reklamlar tanıtım ve iletişim hedefiyle başlar, onay gelince satışa geçilir.</footer>
 </div>
+
+<dialog id="keydlg" aria-labelledby="keyttl">
+  <form method="dialog" id="keyform">
+    <h2 id="keyttl">Ekip girişi</h2>
+    <p>Görevleri işaretlemek için ekip anahtarını yapıştırın. Anahtar yalnızca bu tarayıcıda saklanır; size ekip linki gönderildiyse o linke tıklamanız yeterlidir.</p>
+    <label for="keyin">Ekip anahtarı</label>
+    <input id="keyin" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+    <p class="err" id="keyerr" role="alert"></p>
+    <div class="row">
+      <button type="button" id="keycancel">Vazgeç</button>
+      <button type="submit" id="keyok" class="pri">Giriş yap</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (function(){
@@ -281,10 +313,102 @@
   var allIds=[]; dayKeys.forEach(function(k){DAYS[k].t.forEach(function(_,i){allIds.push(tid(k,i))})});
 
   var checks={}, lastSync=null, syncErr=false;
+  var KEY=null, busy={}, pin={}, pending=null;   // ekip anahtarı, süren işaretler, yeni işaretlerin kısa süreli kilidi
   var REPO="chaseitego-ops/remble-takvim", ISSUES={"2026-09-29": 1, "2026-09-30": 2, "2026-10-01": 3, "2026-10-02": 4, "2026-10-03": 5, "2026-10-04": 6, "2026-10-05": 7, "2026-10-06": 8, "2026-10-07": 9, "2026-10-08": 10, "2026-10-09": 11, "2026-10-10": 12, "2026-10-12": 13, "2026-10-13": 14, "2026-10-14": 15};
   function issueUrl(k){return "https://github.com/"+REPO+"/issues/"+ISSUES[k]}
   var todayKey=key(new Date());
   var sel=DAYS[todayKey]?todayKey:(dayKeys.filter(function(k){return k>=todayKey})[0]||dayKeys[0]);
+
+  /* ── Ekip anahtarı: linkteki #k=… bir kez okunur, tarayıcıda saklanır, adres çubuğundan silinir ── */
+  function keyLoad(){
+    try{
+      var m=location.hash.match(/[#&]k=([^&]+)/);
+      if(m){ localStorage.setItem("remble-key",decodeURIComponent(m[1])); history.replaceState(null,"",location.pathname+location.search); }
+      KEY=localStorage.getItem("remble-key")||null;
+    }catch(e){ KEY=null }
+  }
+  function keySet(k){ KEY=k; try{localStorage.setItem("remble-key",k)}catch(e){} }
+  function keyClear(){ KEY=null; try{localStorage.removeItem("remble-key")}catch(e){} }
+  function api(path,opt){
+    opt=opt||{}; opt.cache="no-store";
+    opt.headers=Object.assign({"Accept":"application/vnd.github+json","Authorization":"Bearer "+KEY,"X-GitHub-Api-Version":"2022-11-28"},opt.headers||{});
+    return fetch("https://api.github.com/repos/"+REPO+path,opt).then(function(r){
+      if(r.status===401){var e=new Error("auth"); e.auth=true; throw e}
+      if(!r.ok){var e2=new Error(String(r.status)); e2.status=r.status; throw e2}
+      return r.json();
+    });
+  }
+  var BOX=/^- \[( |x|X)\]/gm;
+  function parseIssues(list){
+    var next={};
+    list.forEach(function(it){
+      var body=it.body||"", m=body.match(/<!-- gun:(\d{4}-\d{2}-\d{2}) -->/);
+      if(!m||!DAYS[m[1]])return;
+      ISSUES[m[1]]=it.number;
+      var i=0; body.replace(BOX,function(_,c){ if(c!==" ")next[tid(m[1],i)]=true; i++; return _ });
+    });
+    return next;
+  }
+  function applyPins(next){
+    var now=Date.now();
+    Object.keys(pin).forEach(function(id){
+      if(pin[id].until<now){delete pin[id];return}
+      if(pin[id].v)next[id]=true; else delete next[id];
+    });
+    return next;
+  }
+  function toggle(k,i){
+    var id=tid(k,i), want=!checks[id];
+    if(busy[id])return;
+    busy[id]=true; if(want)checks[id]=true; else delete checks[id];
+    pin[id]={v:want,until:Date.now()+20000}; render();
+    api("/issues/"+ISSUES[k]).then(function(it){
+      var n=-1, body=(it.body||"").replace(BOX,function(m){ n++; return n===i?("- ["+(want?"x":" ")+"]"):m });
+      if(n<i)throw new Error("görev bulunamadı");
+      return api("/issues/"+ISSUES[k],{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({body:body})});
+    }).then(function(){
+      delete busy[id]; lastSync=new Date(); syncErr=false; cacheSet({checks:checks,at:lastSync.toISOString()}); render();
+    }).catch(function(e){
+      delete busy[id]; delete pin[id]; if(want)delete checks[id]; else checks[id]=true;
+      if(e.auth){ keyClear(); render(); askKey("Ekip anahtarı geçersiz ya da süresi dolmuş. Yeni anahtarı yapıştırın."); }
+      else { render(); flash(e.status===403||e.status===404?"Bu anahtarın işaretleme yetkisi yok.":"İşaret kaydedilemedi; bağlantınızı kontrol edip yeniden deneyin."); }
+    });
+  }
+  var flashT=null;
+  function flash(msg){ var el=document.getElementById("sync"); el.textContent=msg; clearTimeout(flashT); flashT=setTimeout(renderProgress,6000) }
+
+  /* ── Ekip girişi penceresi ── */
+  var dlg=document.getElementById("keydlg"), keyin=document.getElementById("keyin"), keyerr=document.getElementById("keyerr"), keyok=document.getElementById("keyok");
+  function askKey(msg){ keyerr.textContent=msg||""; keyin.value=""; keyok.disabled=false; if(dlg.showModal)dlg.showModal(); else dlg.setAttribute("open",""); keyin.focus() }
+  function closeKey(){ if(dlg.close)dlg.close(); else dlg.removeAttribute("open") }
+  document.getElementById("keycancel").addEventListener("click",function(){pending=null;closeKey()});
+  document.getElementById("keyform").addEventListener("submit",function(e){
+    e.preventDefault();
+    var v=keyin.value.trim(); if(!v){keyerr.textContent="Anahtarı yapıştırın.";return}
+    keyok.disabled=true; keyerr.textContent="Kontrol ediliyor…";
+    var old=KEY; KEY=v;
+    api("/issues?state=all&per_page=100").then(function(list){
+      keySet(v); checks=applyPins(parseIssues(list)); lastSync=new Date(); syncErr=false; closeKey(); render();
+      if(pending){var p=pending; pending=null; toggle(p[0],p[1])}
+    }).catch(function(e){
+      KEY=old; keyok.disabled=false;
+      keyerr.textContent=e.auth?"Anahtar geçersiz.":(e.status===404||e.status===403?"Bu anahtar takvim deposuna erişemiyor.":"GitHub'a ulaşılamadı; yeniden deneyin.");
+    });
+  });
+  function renderTeam(){
+    var el=document.getElementById("team"); el.innerHTML=""; el.className="team"+(KEY?" on":"");
+    var tx=document.createElement("span"); tx.textContent=KEY?"Ekip girişi açık · işaretleyebilirsiniz":"Yalnızca görüntüleme"; el.appendChild(tx);
+    var mk=function(label,fn){var b=document.createElement("button"); b.type="button"; b.className="linkbtn"; b.textContent=label; b.addEventListener("click",fn); el.appendChild(b); return b};
+    if(KEY){
+      var cp=mk("Ekip linkini kopyala",function(){
+        var url=location.origin+location.pathname+"#k="+encodeURIComponent(KEY);
+        var done=function(){cp.textContent="Kopyalandı ✓"; setTimeout(function(){cp.textContent="Ekip linkini kopyala"},2500)};
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done,function(){window.prompt("Ekip linki:",url)});
+        else window.prompt("Ekip linki:",url);
+      });
+      mk("Çıkış",function(){keyClear();render();pull()});
+    } else mk("Ekip girişi",function(){pending=null;askKey()});
+  }
 
   function cacheGet(){try{return JSON.parse(localStorage.getItem("remble-gh")||"null")}catch(e){return null}}
   function cacheSet(o){try{localStorage.setItem("remble-gh",JSON.stringify(o))}catch(e){}}
@@ -337,16 +461,20 @@
     var hd=document.createElement("div"); hd.className="pdate";
     var chip=document.createElement("span"); chip.className="chip"; chip.textContent=(PHASES.indexOf(p)+1)+". aşama · "+p.name;
     var h=document.createElement("h2"); h.textContent=d.getDate()+" "+MONTHS_L[d.getMonth()]+" "+WD[d.getDay()];
-    var gh=document.createElement("a"); gh.className="ghbtn"; gh.href=issueUrl(sel); gh.target="_blank"; gh.rel="noopener"; gh.textContent="GitHub'da işaretle ↗";
+    var gh=document.createElement("a"); gh.className="ghbtn"; gh.href=issueUrl(sel); gh.target="_blank"; gh.rel="noopener"; gh.textContent="GitHub'da aç ↗";
     hd.appendChild(chip); hd.appendChild(h); hd.appendChild(gh); pn.appendChild(hd);
     if(info.note){var nt=document.createElement("p");nt.className="note";nt.textContent=info.note;pn.appendChild(nt)}
     var ul=document.createElement("ul"); ul.className="tasks";
     info.t.forEach(function(t,i){
-      var id=tid(sel,i), li=document.createElement("li"); li.className="task"+(checks[id]?" done":"");
-      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!checks[id]; cb.tabIndex=-1;
+      var id=tid(sel,i), li=document.createElement("li"); li.className="task"+(checks[id]?" done":"")+(busy[id]?" busy":"");
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!checks[id]; cb.disabled=!!busy[id];
       cb.setAttribute("aria-label",(checks[id]?"Tamamlandı: ":"Açık: ")+t[0]);
-      cb.addEventListener("click",function(e){e.preventDefault();window.open(issueUrl(sel),"_blank","noopener")});
-      var lb=document.createElement("a"); lb.href=issueUrl(sel); lb.target="_blank"; lb.rel="noopener"; lb.className="tl";
+      (function(kk,ii){cb.addEventListener("click",function(e){
+        e.preventDefault();
+        if(!KEY){pending=[kk,ii];askKey();return}
+        setTimeout(function(){toggle(kk,ii)},0);
+      })})(sel,i);
+      var lb=document.createElement("label"); lb.htmlFor=id; lb.className="tl";
       var tt=document.createElement("span"); tt.className="tt"; tt.textContent=t[0]; lb.appendChild(tt);
       if(t[1]){var ts=document.createElement("span");ts.className="ts";ts.textContent=t[1];lb.appendChild(ts)}
       var ow=document.createElement("span"); ow.className="own "+t[2]; ow.textContent=OWN[t[2]];
@@ -365,22 +493,34 @@
     document.getElementById("pnum").innerHTML=c+"<small>/ "+n+" görev</small>";
     document.getElementById("pbar").style.width=(n?Math.round(100*c/n):0)+"%";
     var t=lastSync?lastSync.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):"";
-    document.getElementById("sync").textContent=syncErr?(lastSync?"GitHub'a şu an ulaşılamıyor; "+t+" itibarıyla durum gösteriliyor.":"GitHub'a ulaşılamadı; biraz sonra yeniden denenecek."):(lastSync?"Son değişiklik · "+t:"GitHub'dan alınıyor…");
+    document.getElementById("sync").textContent=syncErr?(lastSync?"GitHub'a şu an ulaşılamıyor; "+t+" itibarıyla durum gösteriliyor.":"GitHub'a ulaşılamadı; biraz sonra yeniden denenecek."):(lastSync?(KEY?"Canlı · son eşitleme "+t:"Son değişiklik · "+t):"GitHub'dan alınıyor…");
+    renderTeam();
   }
   function render(){renderPhases();renderGrid();renderPanel();renderProgress()}
 
-  function pull(){
+  function pullFile(){
     fetch("durum.json?t="+Date.now(),{cache:"no-store"}).then(function(r){
       if(!r.ok)throw new Error(r.status); return r.json();
     }).then(function(o){
       var next={}; Object.keys(o.days||{}).forEach(function(k){ if(!DAYS[k])return; o.days[k].forEach(function(v,i){ if(v)next[tid(k,i)]=true; }); });
-      checks=next; lastSync=o.at?new Date(o.at):new Date(); syncErr=false;
+      checks=applyPins(next); lastSync=o.at?new Date(o.at):new Date(); syncErr=false;
       cacheSet({checks:checks,at:lastSync.toISOString()}); render();
     }).catch(function(){syncErr=true;renderProgress()});
   }
+  function pull(){
+    if(!KEY){pullFile();return}
+    api("/issues?state=all&per_page=100").then(function(list){
+      checks=applyPins(parseIssues(list)); lastSync=new Date(); syncErr=false;
+      cacheSet({checks:checks,at:lastSync.toISOString()}); render();
+    }).catch(function(e){
+      if(e.auth){keyClear();render()}
+      pullFile();
+    });
+  }
   var c0=cacheGet(); if(c0&&c0.checks){checks=c0.checks; lastSync=new Date(c0.at); syncErr=true}
-  render(); pull();
-  setInterval(function(){if(!document.hidden)pull()},60000);
+  keyLoad(); render(); pull();
+  var tick=0;
+  setInterval(function(){ tick++; if(document.hidden)return; if(KEY||tick%4===0)pull() },15000);
   document.addEventListener("visibilitychange",function(){if(!document.hidden)pull()});
 })();
 </script>
