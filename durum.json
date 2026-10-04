@@ -9,15 +9,15 @@
    true,
    true,
    true,
-   false
+   true
   ],
   "2026-10-01": [
-   false
+   true
   ],
   "2026-10-02": [
    false,
-   false,
-   false
+   true,
+   true
   ],
   "2026-10-03": [
    false,
@@ -70,5 +70,5 @@
    false
   ]
  },
- "at": "2026-10-01T16:40:44+00:00"
+ "at": "2026-10-04T21:40:15+00:00"
 }
